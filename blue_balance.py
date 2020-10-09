@@ -40,7 +40,7 @@ class Balancer:
         self.cam = camera.Camera(cam_num=cam_num)
         im = self.cam.get_frame()
         self.hex, self.center, self.crop, self.mask = self.find_hexagon(im)
-        im = images.crop_and_mask(im, self.crop, self.mask, mask_color='white')
+        im = images.crop_and_mask(im, self.crop, self.mask)
         self.im_shape = im.shape
         im = images.draw_polygon(im, self.hex)
         im = images.draw_circle(im, self.center[0], self.center[1], 3)
@@ -123,12 +123,12 @@ class Balancer:
         corner_dists = spatial.distance.cdist(np.array(center).reshape(1, 2),
                                               self.hex)
         closest_corner = np.argmin(corner_dists)
-        instructions = {0: 'Raise Motor 2',
-                        1: 'Raise Motors 1 and 2',
-                        2: 'Raise Motor 1',
-                        3: 'Lower Motor 2',
-                        4: 'Lower Motors 1 and 2',
-                        5: 'Lower Motor 1'}
+        instructions = {0: 'Lower Motor 2',
+                        1: 'Lower Motors 1 and 2',
+                        2: 'Lower Motor 1',
+                        3: 'Raise Motor 2',
+                        4: 'Raise Motors 1 and 2',
+                        5: 'Raise Motor 1'}
         self.set_step_size(distance)
         return instructions[closest_corner], distance
 
@@ -149,9 +149,7 @@ class Balancer:
     def find_center(self, im):
         # images.save(im, 'test.png')
         im0 = im.copy()
-        im = images.threshold(im, 150)
-        im = images.dilate(im, (3, 3))
-        im = images.opening(im, (17, 17))
+        im = images.threshold(im, 130)
         center = images.center_of_mass(im)
         im0 = images.gray_to_bgr(im0)
         im0 = images.draw_circle(im0, center[0], center[1], 5)
@@ -165,11 +163,8 @@ class Balancer:
     def mean_im(self):
         ims = []
         for f in range(8):
-            im = ~self.cam.get_frame()
+            im = self.cam.get_frame()
             im = images.crop_and_mask(im, self.crop, self.mask)
-            # if f == 0:
-            #     ring_mask = images.inrange(images.bgr_to_lab(im), (0, 113, 0),
-            #                                (255, 152, 255))
             im = images.bgr_to_gray(im)
             ims.append(im)
         images.save(ims[0], self.log_direc + '{}_original.png'.format(self.i))
@@ -209,7 +204,7 @@ class Balancer:
 
 if __name__ == "__main__":
     # import sys
-    start, end, rate, repeats = 660, 645, 0.1, 3#sys.argv[1:5]
+    start, end, rate, repeats = 700, 600, 1, 3#sys.argv[1:5]
     start = int(start)
     end = int(end)
     rate = float(rate)

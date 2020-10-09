@@ -9,20 +9,20 @@ MY_PARAMETERS = {
     'crop method': 'manual',
     'no_of_sides': 6,
     'method': ('flip', 'crop_and_mask', 'grayscale'),
-    'min_dist': [17, 3, 51, 1],
+    'min_dist': [27, 3, 51, 1],
     'p_1': [203, 1, 255, 1],
-    'p_2': [6, 1, 20, 1],
-    'min_rad': [14, 1, 101, 1],
-    'max_rad': [14, 1, 101, 1]
+    'p_2': [4, 1, 20, 1],
+    'min_rad': [17, 1, 101, 1],
+    'max_rad': [17, 1, 101, 1]
 }
 
 
 class HoughManager:
     
-    def __init__(self):
+    def __init__(self, crop_result=None):
         self.parameters = MY_PARAMETERS
         self.preprocessor = preprocessing.PreProcessor(
-            self.parameters
+            self.parameters, crop_result
         )
     
     def process(self, frame):
@@ -118,7 +118,7 @@ def read_audio_file(file, frames):
     wav_l = wav[:, 0]
     # wav = audio.digitise(wav)
     freqs = frame_frequency(wav_l, frames, 48000)
-    d = (freqs - 1000)/15
+    d = (freqs - 1000)//15
     return d
 
 

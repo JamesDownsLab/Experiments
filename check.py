@@ -22,4 +22,4 @@ def check(filename):
 
 
 if __name__ == "__main__":
-    check("/home/ppxjd3/Videos/new_short.MP4")
+    check("/media/data/Data/Orderphobic/StuckIntruders/OneIntruderDifferentDuties/17070007.MP4")
