@@ -11,6 +11,9 @@ seaborn.set()
 from Generic import images, filedialogs
 from ParticleTracking import dataframes, statistics
 
+from labvision import images
+
+images.crop_polygon()
 
 def run(direc, lattice_spacing=5):
     files = filedialogs.get_files_directory(direc + '/*.png')
