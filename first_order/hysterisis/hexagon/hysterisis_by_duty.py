@@ -7,15 +7,28 @@ import matplotlib.pyplot as plt
 import matplotlib.path as mplpath
 import numpy as np
 import duty
+import psutil
 
-PARAMETER = 'order'
+PARAMETER = 'order_long'
 
-direc = "/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense"
-save_direc = f"/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense/Results_hexed_{PARAMETER}_duty"
-files = filehandling.get_directory_filenames(direc + '/*.hdf5')
-data_direc = "/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense/HexagonFigures/data"
-labels = {'up': 'heating', 'down': 'cooling'}
-COLORS = {'up': 'r', 'down': 'c'}
+DIMPLED = 0
+FLAT = 1
+plate = FLAT
+
+if plate == FLAT:
+    direc = "/media/data/Data/FirstOrder/Hysterisis/FlatPlate/Trial2"
+    save_direc = f"/media/data/Data/FirstOrder/Hysterisis/FlatPlate/Trial2/Results_hexed_{PARAMETER}_duty"
+    files = filehandling.get_directory_filenames(direc + '/*.hdf5')
+    data_direc = "/media/data/Data/FirstOrder/Hysterisis/FlatPlate/Trial2/HexagonFigures/data"
+    labels = {'up': 'heating', 'down': 'cooling'}
+    COLORS = {'up': 'r', 'down': 'c'}
+else:
+    direc = "/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense"
+    save_direc = f"/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense/Results_hexed_{PARAMETER}_duty"
+    files = filehandling.get_directory_filenames(direc + '/*.hdf5')
+    data_direc = "/media/data/Data/FirstOrder/Hysterisis/5Repeats/RedTrayDense/HexagonFigures/data"
+    labels = {'up': 'heating', 'down': 'cooling'}
+    COLORS = {'up': 'r', 'down': 'c'}
 
 def filter_box(df, xmin, xmax, ymin, ymax):
     df = df.loc[(df.x > xmin) * (df.x < xmax) * (df.y > ymin) * (df.y < ymax)]
@@ -33,23 +46,27 @@ def filter_hexagon(df, corners, factor):
     include = path.contains_points(df[['x', 'y']].values)
     return df[include]
 
+def create_csv(file):
+    filename = os.path.splitext(os.path.split(file)[1])[0]
+    rate, direction, trial = filename.split('_')
+    trial = int(trial)
+    with dataframes.DataStore(file) as data:
+        df = data.df
+    df.Duty = df.Duty.round()
+    df = filter_hexagon(df, data.metadata['boundary'], 0.8)
+
+    df = df.groupby('Duty')[PARAMETER].mean()
+    df.to_csv(f'{save_direc}/{rate}_{direction}_{trial}')
+
 
 def calculate_and_save_data(files):
     for file in tqdm(files):
-        filename = os.path.splitext(os.path.split(file)[1])[0]
-        rate, direction, trial = filename.split('_')
-        trial = int(trial)
-        data = dataframes.DataStore(file)
-        df = data.df
-        df.Duty = df.Duty.round()
-        # df = filter_box(df, 750, 1250, 750, 1250)
-        df = filter_hexagon(df, data.metadata['boundary'], 0.8)
-
-        result = df.groupby('Duty')[PARAMETER].mean()
-        result.to_csv(f'{save_direc}/{rate}_{direction}_{trial}')
+        create_csv(file)
+        process = psutil.Process(os.getpid())
+        print('Memory usage : ', process.memory_info().rss / 1e9, ' GB')
 
 
-# calculate_and_save_data(files)
+calculate_and_save_data(files)
 
 data_files = filehandling.get_directory_filenames(save_direc+'/*')
 
@@ -77,7 +94,7 @@ def plot_mean(results):
             std = data.groupby('Duty').std()
             dim_acc = duty.d2G(mean.index)
             ax[i].errorbar(dim_acc, mean[PARAMETER], yerr=std[PARAMETER], fmt=COLORS[direction], label=labels[direction])
-            ax[i].set_ylim([0.6, 0.9])
+            ax[i].set_ylim([0.5, 0.9])
             ax[i].set_xlim([duty.d2G(620),
                             duty.d2G(680)])
             ax[i].text(duty.d2G(625), 0.7, f'rate = {rate}')
@@ -112,7 +129,7 @@ def plot_all(results):
                 acc = duty.d2G(trials[j].index)
                 ax[i].plot(acc, trials[j][PARAMETER], color=colors[j], label=j)
         # ax[i].set_title(rate)
-        ax[i].set_ylim([0.6, 0.9])
+        ax[i].set_ylim([0.5, 0.9])
         ax[i].set_xlim([duty.d2G(620), duty.d2G(680)])
         ax[i].text(duty.d2G(625), 0.7, f'rate = {rate}')
 

@@ -21,8 +21,13 @@ class HoughManager:
     
     def __init__(self, crop_result=None):
         self.parameters = MY_PARAMETERS
+        if crop_result is not None:
+            self.parameters['crop method'] = 'batched'
+            self.parameters['crop'] = crop_result.bbox
+            self.parameters['mask image'] = crop_result.mask
+            self.parameters['boundary'] = crop_result.points
         self.preprocessor = preprocessing.PreProcessor(
-            self.parameters, crop_result
+            self.parameters
         )
     
     def process(self, frame):
@@ -163,6 +168,7 @@ def extract_wav(file):
 if __name__ == "__main__":
     import filehandling
     # file = "/home/ppxjd3/Videos/new_short.MP4"
-    file = filehandling.open_filename()
+    # file = filehandling.open_filename()
+    file = "/media/data/Data/FirstOrder/Hysterisis/FlatPlate/Trial2/0.2_up_5.MP4"
     tracker = tracking.ParticleTracker(file, HoughManager(), multiprocess=False)
     tracker.track()

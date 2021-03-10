@@ -147,9 +147,9 @@ class Balancer:
             self.step_size = 10
 
     def find_center(self, im):
-        # images.save(im, 'test.png')
         im0 = im.copy()
-        im = images.threshold(im, 130)
+        im = images.threshold(im, 80)
+        im = images.opening(im, (6, 6))
         center = images.center_of_mass(im)
         im0 = images.gray_to_bgr(im0)
         im0 = images.draw_circle(im0, center[0], center[1], 5)
@@ -204,7 +204,7 @@ class Balancer:
 
 if __name__ == "__main__":
     # import sys
-    start, end, rate, repeats = 700, 600, 1, 3#sys.argv[1:5]
+    start, end, rate, repeats = 660, 600, 0.5, 5#sys.argv[1:5]
     start = int(start)
     end = int(end)
     rate = float(rate)

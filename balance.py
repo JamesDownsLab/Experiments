@@ -209,7 +209,7 @@ class Balancer:
 
 if __name__ == "__main__":
     # import sys
-    start, end, rate, repeats = 660, 645, 0.1, 3#sys.argv[1:5]
+    start, end, rate, repeats = 660, 550, 0.5, 3#sys.argv[1:5]
     start = int(start)
     end = int(end)
     rate = float(rate)

@@ -8,8 +8,12 @@ from tqdm import tqdm
 from labvision import images, video
 from particletracking import dataframes, statistics
 
-direc = filehandling.open_directory('Open Directory containing videos')
-files = os.listdir(direc)
+direc1 = filehandling.open_directory('Open Directory containing videos')
+files = filehandling.get_directory_filenames(direc1+'/*.MP4')
+# direc2 = filehandling.open_directory()
+# files2 = filehandling.get_directory_filenames(direc2+'/*.MP4')
+# files = files1 + files2
+print(files)
 
 def get_crop_result(file):
     vid = video.ReadVideo(file)
@@ -17,7 +21,7 @@ def get_crop_result(file):
     return images.crop_polygon(frame)
 
 for i, file in tqdm(enumerate(files)):
-    file = direc + '/' + file
+    # file = direc + '/' + file
     name, ext = os.path.splitext(file)
     if ext == '.MP4':
         if i == 0: crop_result = get_crop_result(file)
@@ -26,9 +30,9 @@ for i, file in tqdm(enumerate(files)):
             tracker = tracking.ParticleTracker(file, track.HoughManager(crop_result=crop_result), True)
             tracker.track()
 
-files = filehandling.get_directory_filenames(direc+'/*.hdf5')
+# files = filehandling.get_directory_filenames(direc+'/*.hdf5')
 for file in files:
     data = dataframes.DataStore(file)
     calculator = statistics.PropertyCalculator(data)
     calculator.order()
-    calculator.density()
+    # calculator.density()
