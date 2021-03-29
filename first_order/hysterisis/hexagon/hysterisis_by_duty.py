@@ -66,7 +66,7 @@ def calculate_and_save_data(files):
         print('Memory usage : ', process.memory_info().rss / 1e9, ' GB')
 
 
-calculate_and_save_data(files)
+# calculate_and_save_data(files)
 
 data_files = filehandling.get_directory_filenames(save_direc+'/*')
 
@@ -94,7 +94,7 @@ def plot_mean(results):
             std = data.groupby('Duty').std()
             dim_acc = duty.d2G(mean.index)
             ax[i].errorbar(dim_acc, mean[PARAMETER], yerr=std[PARAMETER], fmt=COLORS[direction], label=labels[direction])
-            ax[i].set_ylim([0.5, 0.9])
+            ax[i].set_ylim([0.5, 0.8])
             ax[i].set_xlim([duty.d2G(620),
                             duty.d2G(680)])
             ax[i].text(duty.d2G(625), 0.7, f'rate = {rate}')
