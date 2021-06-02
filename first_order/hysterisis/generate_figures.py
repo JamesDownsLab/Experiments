@@ -48,9 +48,13 @@ images.save(end, f'{save_direc}/end.png')
 
 new_corners = get_crop_region(start, metadata['boundary'])
 
-start = images.draw_polygon(start, new_corners, color=images.RED, thickness=8)
-middle = images.draw_polygon(middle, new_corners, color=images.RED, thickness=8)
-end = images.draw_polygon(end, new_corners, color=images.RED, thickness=8)
+# start = images.draw_polygon(start, new_corners, color=images.GREEN, thickness=8)
+# middle = images.draw_polygon(middle, new_corners, color=images.GREEN, thickness=8)
+# end = images.draw_polygon(end, new_corners, color=images.GREEN, thickness=8)
+new_corners = np.hstack((new_corners, np.ones((6, 1))*3))
+start = images.draw_circles(start, new_corners, color=images.GREEN)
+middle = images.draw_circles(middle, new_corners, color=images.GREEN)
+end = images.draw_circles(end, new_corners, color=images.GREEN)
 
 images.save(start, f'{save_direc}/start_hex.png')
 images.save(middle, f'{save_direc}/middle_hex.png')
