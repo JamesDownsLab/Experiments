@@ -12,5 +12,13 @@ def d2G(d):
     """Converts duty cycle to dimensionless acceleration"""
     return d2a(d) / g
 
+def a2d(a):
+    d = (a + v2a*1.5)/(v2a*0.003)
+    return d
+
+def G2d(a):
+    d = a2d(a*g)
+    return d
+
 if __name__ == '__main__':
-    print(d2G(700))
+    print(d2G(680))
