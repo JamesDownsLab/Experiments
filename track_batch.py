@@ -30,19 +30,13 @@ def go(files, crop_result):
                 # tracker.link()
     return crop_result
 
-direc1 = "/media/data/Data/FirstOrder/Susceptibility/Flat2"
-files1 = filehandling.get_directory_filenames(direc1+'/*.MP4')
-crop_result = go(files1, None)
-direc2 = "/media/data/Data/FirstOrder/Susceptibility/Dimpled2"
-files2 = filehandling.get_directory_filenames(direc2+'/*.MP4')
-go(files2, crop_result)
+parent = "/media/data/Data/N32/PhaseDiagram_2021_07_06"
+all_files = []
+for direc in os.listdir(parent):
+    new_direc = parent + '/' + direc
+    print(new_direc)
+    files = filehandling.get_directory_filenames(new_direc+'/*.MP4')
+    all_files += files
 
-files1 = filehandling.get_directory_filenames(direc1+'/*.hdf5')
-files2 = filehandling.get_directory_filenames(direc2+'/*.hdf5')
-files = files1 + files2
-for file in files:
-    data = dataframes.DataStore(file)
-    calculator = statistics.PropertyCalculator(data)
-    calculator.order_long()
-    calculator.order_nearest_6()
-    calculator.density()
+print(all_files)
+go(all_files, None)

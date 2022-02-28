@@ -8,13 +8,13 @@ import time
 # rate = float(rate)
 # delay = int(delay)
 
-start = 700
-end = 600
+start = 540
+end = 440
 rate = 0.2
 delay = 10
 
 s = shaker.Shaker()
-for i in range(5):
+for i in range(1):
     s.change_duty(start)
     time.sleep(5)
     s.ramp(start, end, rate, record=True)

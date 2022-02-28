@@ -23,4 +23,4 @@ def check(filename):
 
 
 if __name__ == "__main__":
-    check("/media/data/Data/FirstOrder/Susceptibility/Flat2/17500099.MP4")
+    check("/media/data/Data/N32/PhaseDiagram_2021_07_06/1700/595.MP4")

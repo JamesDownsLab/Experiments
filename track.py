@@ -166,9 +166,6 @@ def extract_wav(file):
 
 
 if __name__ == "__main__":
-    import filehandling
-    # file = "/home/ppxjd3/Videos/new_short.MP4"
-    # file = filehandling.open_filename()
-    file = "/media/data/Data/FirstOrder/Hysterisis/FlatPlate/Trial2/0.2_up_5.MP4"
+    file = "/media/data/Data/N32/PhaseDiagram_2021_07_06/1700/595.MP4"
     tracker = tracking.ParticleTracker(file, HoughManager(), multiprocess=False)
     tracker.track()

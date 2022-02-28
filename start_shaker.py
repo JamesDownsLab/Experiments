@@ -1,4 +1,4 @@
 from labequipment import shaker
 
 s = shaker.Shaker()
-s.change_duty(650)
+s.init_duty(650)
