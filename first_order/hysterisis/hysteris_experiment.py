@@ -8,9 +8,9 @@ import time
 # rate = float(rate)
 # delay = int(delay)
 
-start = 540
-end = 440
-rate = 0.2
+start = 500
+end = 400
+rate = 1
 delay = 10
 
 s = shaker.Shaker()
