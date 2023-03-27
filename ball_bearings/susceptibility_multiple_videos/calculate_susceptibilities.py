@@ -6,15 +6,19 @@ from scipy import spatial
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import seaborn as sns
 
+sns.set('paper')
+
+refine = True
 
 def main():
-    direc = "/media/data/Data/BallBearing/HIPS/PhaseDiagramsNewPlate/2,25mm/80%"
+    direc = "/media/data/Data/BallBearing/HIPS/PhaseDiagramsNewPlate/2,42mm/85%"
 
     data_files = filehandling.list_files(f'{direc}/*.hdf5')
 
-    G = get_G(data_files[0])
-    # plot_G(data_files[0], G)
+    G = get_G(data_files[0], order_threshold=0.8)
+    plot_G(data_files[0], G)
     add_torder(data_files, G)
     plot_torder(data_files[0])
     plot_torder_and_horder(data_files[0])
@@ -28,8 +32,17 @@ def main():
         suses_h.append(sus_h)
         suses_t.append(sus_t)
 
-    plt.plot(duties, suses_h)
-    plt.plot(duties, suses_t)
+
+    fig, ax1 = plt.subplots()
+    color1 = 'tab:red'
+    ax1.set_xlabel('Duty')
+    ax1.set_ylabel('$\chi_6$', color=color1)
+    ax1.plot(duties, suses_h, color=color1)
+
+    color2 = 'tab:blue'
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('$\chi_T$', color=color2)
+    ax2.plot(duties, suses_t, color=color2)
     plt.show()
 
     print(G)
@@ -116,24 +129,68 @@ def plot_G(file, G):
     plt.arrow(xmid, ymid, G[0]*1000, G[1]*1000, width=2)
     plt.show()
 
-def get_G(df):
+def get_G(df, order_threshold=None):
     """Use the lowest amplitude data file to get G"""
     df = pd.read_hdf(df, 'data')
-    vecs = get_delaunay_vectors(df.loc[0])
+    frame = df.loc[0]
+    if order_threshold is not None:
+        frame = frame.loc[np.abs(frame.hexatic_order)>order_threshold]
+    vecs = get_delaunay_vectors(frame)
     angles = get_delaunay_angles(vecs)
     angle = get_delaunay_angle(angles)
     lengths = get_delaunay_lengths(vecs)
     length = get_delaunay_length(lengths)
+    def torder_angle_std(l, a):
+        G = calculate_G(l, a)
+        torder = np.exp(1j * frame[['x', 'y']].values @ G)
+        angles = np.angle(torder)
+        std = np.std(angles)
+        return std
+
+    if refine:
+        torder_angle_std_vect = np.vectorize(torder_angle_std)
+        length, angle = refine_l_and_a(length, angle, torder_angle_std_vect, plot=True, width=0.9)
+        length, angle = refine_l_and_a(length, angle, torder_angle_std_vect, plot=True, width=0.05)
     G = calculate_G(length, angle)
     return G
 
+
+
+
+
+def refine_l_and_a(l, a, func, plot=False, width=0.05):
+    lengths = np.linspace((1-width)*l, (1+width)*l, 100)
+    angles = np.linspace((1-width)*a, (1+width)*a, 100)
+    lengths, angles = np.meshgrid(lengths, angles)
+    stds = func(lengths, angles)
+    min_index = np.unravel_index(np.argmin(stds, axis=None), stds.shape)
+    new_length = lengths[min_index]
+    new_angle = angles[min_index]
+    if plot:
+        plt.figure()
+        plt.subplot(1, 3, 1)
+        plt.imshow(stds)
+        plt.axvline(min_index[1], c='red')
+        plt.axhline(min_index[0], c='red')
+        plt.subplot(1, 3, 2)
+        plt.plot(lengths[min_index[0], :], stds[min_index[0], :])
+        plt.axvline(l, c='red')
+        plt.axvline(new_length, c='green')
+        plt.xlabel('Length [pix]')
+        plt.subplot(1, 3, 3)
+        plt.plot(angles[:, min_index[1]], stds[:, min_index[1]])
+        plt.axvline(a, c='red')
+        plt.axvline(new_angle, c='green')
+        plt.xlabel('Angle [rad]')
+        plt.show()
+    return new_length, new_angle
+
 def calculate_G(length, angle):
-    a = (angle+90) * np.pi/180
+    a = angle + np.pi/2
     cosa = np.cos(a)
     sina = np.sin(a)
     l = 4 * np.pi / (length * np.sqrt(3))
     return np.array((cosa, sina))*l
-
 
 
 def get_delaunay_length(lengths):

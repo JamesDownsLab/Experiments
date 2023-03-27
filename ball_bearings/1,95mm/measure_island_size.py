@@ -6,24 +6,28 @@ import matplotlib.pyplot as plt
 import scipy.spatial
 from scipy import spatial
 from typing import TypeVar
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 DelaunayTesselation = TypeVar('scipy.spatial.Delaunay')
 
 def plot_clusters(df):
-    plt.subplot(1, 2, 1)
-    plt.scatter(df.x, df.y, c=np.angle(df.translational_order), cmap='hsv')
-    def annotate(a):
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+    scatt1 = ax1.scatter(df.x, df.y, c=np.angle(df.translational_order), cmap='hsv')
+    def annotate(a, ax):
         if len(a) > 3:
             hull = spatial.ConvexHull(a[['x', 'y']].values)
             i = hull.vertices
             i = np.append(i, hull.vertices[0])
-            plt.plot(a.x.values[i], a.y.values[i], 'r--')
-    df.groupby('cluster').apply(annotate)
-    plt.axis('equal')
-    plt.subplot(1, 2, 2)
-    plt.scatter(df.x, df.y, c=np.abs(df.hexatic_order), cmap='hsv')
-    df.groupby('cluster').apply(annotate)
-    plt.axis('equal')
+            ax.plot(a.x.values[i], a.y.values[i], 'r--')
+    df.groupby('cluster').apply(annotate, ax1)
+
+    fig.colorbar(scatt1, ax=ax1, shrink=0.6)
+    ax1.set_aspect('equal')
+    scatt2 = ax2.scatter(df.x, df.y, c=np.abs(df.hexatic_order), cmap='hsv')
+    df.groupby('cluster').apply(annotate, ax2)
+
+    ax2.set_aspect('equal')
+    fig.colorbar(scatt2, ax=ax2, shrink=0.6)
     plt.show()
 
 def estimate_diameter(points):
@@ -51,6 +55,7 @@ def delaunay_neighbours(points: np.ndarray, distance_threshold: float=None) -> l
     else:
         neighbours = [points_indices[i:j] for i, j in zip(list_indices[:-1], list_indices[1:])]
     return neighbours
+
 
 @profile
 def add_clusters(frame: pd.DataFrame,
@@ -80,7 +85,7 @@ def add_clusters(frame: pd.DataFrame,
             if len(neighbours) == 0: continue
             neighbours_angles = translational_angle[neighbours]
             angle_differences = np.abs(current_angle - neighbours_angles)
-            neighbours = neighbours[angle_differences < angle_threshold]
+            neighbours = neighbours[(angle_differences < angle_threshold) | (angle_differences > 2*np.pi - angle_threshold)]
             if len(neighbours) == 0: continue
             # Check if one of the neighbouring pairs has high hexatic order
             if hexatic_abs[index] > hexatic_threshold:
@@ -99,9 +104,9 @@ def add_clusters(frame: pd.DataFrame,
 
 if __name__ == '__main__':
     from order_parameters import add_translational_order
-    data = pd.read_hdf("/media/data/Data/BallBearing/HIPS/PhaseDiagramsNewPlate/1,95mm/80%/451.hdf5")
+    data = pd.read_hdf("/media/data/Data/BallBearing/HIPS/IslandExperiments/1,87mmRepeats/19370064.hdf5")
     data, lattice_vector = add_translational_order(data)
     frame = data.loc[0]
     diameter = estimate_diameter(frame[['x', 'y']].values)
-    frame = add_clusters(frame.copy(), 0.1, 0.8, 2*diameter)
+    frame = add_clusters(frame.copy(), 0.2, 0.8, 2*diameter)
     plot_clusters(frame)

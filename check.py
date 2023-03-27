@@ -9,6 +9,8 @@ def check(filename):
     data_name = core_name + '.hdf5'
     out_name = core_name + '_check.png'
     data = dataframes.DataStore(data_name)
+    x = data.get_info(0, ['x'])
+    print(len(x))
     crop = data.metadata['crop']
     vid = video.ReadVideo(vid_name)
     print(vid_name)
@@ -23,4 +25,4 @@ def check(filename):
 
 
 if __name__ == "__main__":
-    check("/media/data/Data/N32/PhaseDiagram_2021_07_06/1700/595.MP4")
+    check("/media/data/Data/N29/FirstOrder/Interfaces/RepeatsForFluctuationsNovember2019/16320002.hdf5")

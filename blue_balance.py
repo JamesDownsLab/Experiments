@@ -117,6 +117,8 @@ class Balancer:
         self.motors.move_motor(motor, steps, direction)
 
     def find_instruction(self, center):
+        """center is the center of whatever I'm measuring
+        self.center is the center of the tray"""
         # center = np.mean(centers, axis=0)
         distance = ((center[0] - self.center[0]) ** 2 + (
                     center[1] - self.center[1]) ** 2) ** 0.5

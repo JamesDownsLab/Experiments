@@ -46,13 +46,17 @@ def torder_angle_std(l, a, points):
     std = np.std(angles)
     return std
 
-torder_angle_std_vect = np.vectorize(torder_angle_std)
+torder_angle_std_vect = np.vectorize(torder_angle_std, excluded=['points'])
 
 def refine_l_and_a(l, a, points, width=0.05):
     lengths = np.linspace((1 - width) * l, (1 + width) * l, 100)
     angles = np.linspace((1 - width) * a, (1 + width) * a, 100)
     lengths, angles = np.meshgrid(lengths, angles)
-    stds = torder_angle_std_vect(lengths, angles, points)
+    stds = np.zeros_like(lengths)
+    for li, l in enumerate(lengths):
+        for ai, a in enumerate(angles):
+            stds[li, ai] = torder_angle_std(l, a, points)
+    # stds = torder_angle_std_vect(lengths, angles, points)
     min_index = np.unravel_index(np.argmin(stds, axis=None), stds.shape)
     new_length = lengths[min_index]
     new_angle = angles[min_index]

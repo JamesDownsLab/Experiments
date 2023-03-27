@@ -21,4 +21,4 @@ def G2d(a):
     return d
 
 if __name__ == '__main__':
-    print(d2G(680))
+    print(d2G(600)-d2G(599))

@@ -2,13 +2,20 @@ from labequipment import shaker
 import numpy as np
 import time
 
-s = shaker.Shaker()
-s.change_duty(550)
+START = 520
+END = 420
+REPEATS = 10
+RATE = 0.2
+RECORD = 5
+WAIT = 3
 
-for i in range(50):
-    s.ramp(550, 450, 0.2)
-    s.init_duty(450)
-    time.sleep(5)
-    s.init_duty(450)
-    time.sleep(3)
+s = shaker.Shaker()
+s.change_duty(START)
+
+for i in range(REPEATS):
+    s.ramp(START, END, RATE)
+    s.init_duty(END)
+    time.sleep(RECORD)
+    s.init_duty(END)
+    time.sleep(WAIT)
 
